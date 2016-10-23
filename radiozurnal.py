@@ -16,29 +16,37 @@ def downloadDay(day):
     print("Getting: "+day)
 
     httpResponse = requests.get(url)
-    body = httpResponse.text
+    if httpResponse.status_code == 200:
+        body = httpResponse.text
 
-    matches = REGEX.findall(body)
+        matches = REGEX.findall(body)
 
-    outputFile = codecs.open(getDayFileName(day,True),"w",'utf-8')
+        if len(matches)>0:
+            outputFile = codecs.open(getDayFileName(day,True),"w",'utf-8')
 
-    for m in matches:
-        for x in [m[1],";",m[2],";",m[0],"\n"]:
-            outputFile.write(x)
+            for m in matches:
+                for x in [m[1],";",m[2],";",m[0],"\n"]:
+                    outputFile.write(x)
 
-    outputFile.close()
+            outputFile.close()
+        else:
+            print("No playlist found")
 
 def readDay(day,its,tmp=False):
-    inputFile = codecs.open(getDayFileName(day,tmp),"r",'utf-8')
+    dataFile = getDayFileName(day,tmp)
+    if os.path.isfile(dataFile):
+        inputFile = codecs.open(dataFile,"r",'utf-8')
 
-    recs = [r.split(";") for r in inputFile]
+        recs = [r.split(";") for r in inputFile]
 
-    for r in recs:
-        if its.get(r[0]) == None:
-            its[r[0]] = []
+        for r in recs:
+            if its.get(r[0]) == None:
+                its[r[0]] = []
 
-        if not r[1] in its[r[0]]:
-            its[r[0]].append(r[1])
+            if not r[1] in its[r[0]]:
+                its[r[0]].append(r[1])
+    else:
+        print("No data found for day: "+day)
 
 def getReadDays():
     readDays = []
